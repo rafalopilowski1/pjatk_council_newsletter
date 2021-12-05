@@ -23,8 +23,8 @@ async fn get_data(feed_url: &str) -> Result<Feed, Box<dyn Error>> {
 }
 
 async fn send_webhook(feed: &Feed, url: &str) -> Result<(), Box<dyn Error>> {
-    let secret = "https://discord.com/api/webhooks/917158640119611442/K8F4SWhJGzqM0GiH3VVy36wQlLK02VoVz2EVXTLbkZcnLG3gi_pvVuW09rXxEteL9nQs";
-    Ok(webhook::new(secret, |webhook| {
+    let secret = std::env::var("WEBHOOK_SECRET")?;
+    Ok(webhook::new(&secret, |webhook| {
         let feed_entry = feed.entries().first().unwrap();
         webhook.username("Listonosz PJATK").embed(|embed| {
             let mut feed_content_str = feed_entry.content().unwrap().value().unwrap();
