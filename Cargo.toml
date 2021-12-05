@@ -4,8 +4,6 @@ version = "1.0.0"
 edition = "2018"
 author = "Rafał Opiłowski <rafalopilowski1@outlook.com>"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 ferrishook = "2.0.1"
 tokio = "1.14.0"

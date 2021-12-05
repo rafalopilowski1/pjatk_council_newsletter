@@ -53,12 +53,13 @@ async fn send_webhook(feed: &Feed, url: &str) -> Result<(), Box<dyn Error>> {
                 .description(text)
                 .footer(|footer| {
                     footer.text(
-                        feed_entry
-                            .published()
-                            .unwrap()
-                            .naive_local()
-                            .format("%d-%m-%Y %H:%M:%S")
-                            .to_string(),
+                        "Data publikacji: ".to_owned()
+                            + &feed_entry
+                                .published()
+                                .unwrap()
+                                .naive_local()
+                                .format("%d-%m-%Y %H:%M:%S")
+                                .to_string(),
                     )
                 })
                 .title(feed_entry.title())
