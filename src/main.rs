@@ -46,7 +46,9 @@ async fn send_webhook(feed: &Feed, url: &str) -> Result<(), Box<dyn Error>> {
             embed
                 .author(|author| {
                     let feed_author = feed_entry.authors().first().unwrap();
-                    author.name(feed_author.name())
+                    author
+                        .name(feed_author.name())
+                        .url(feed_entry.links().first().unwrap().href())
                 })
                 .color(0x8ebda7)
                 .image(feed_content_image_url)

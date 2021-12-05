@@ -1,6 +1,6 @@
 [package]
 name = "pjatk_council_newsletter"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2018"
 author = "Rafał Opiłowski <rafalopilowski1@outlook.com>"
 
