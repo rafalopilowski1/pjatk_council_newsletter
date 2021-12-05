@@ -1,6 +1,6 @@
 [package]
 name = "pjatk_council_newsletter"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2018"
 author = "Rafał Opiłowski <rafalopilowski1@outlook.com>"
 
@@ -11,4 +11,5 @@ ferrishook = "2.0.1"
 tokio = "1.14.0"
 atom_syndication = { version = "0.11.0", features = ["with-serde"] }
 reqwest = "0.11.7"
-xml_dom = "0.2.5"
+scraper = "0.12.0"
+regex = "1.5.4"
