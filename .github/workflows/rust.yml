@@ -13,5 +13,5 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run
       env:
-        POSTMAN_WEBHOOK: ${{ secrets.WEBHOOK_SECRET }}
+        WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
       run: cargo run --release
