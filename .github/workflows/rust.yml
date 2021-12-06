@@ -20,8 +20,8 @@ jobs:
       - name: Cache timestamp
       - uses: actions/cache@v2
         with:
-          - key: "timestamp"
-          - path: "~/timestamp.txt"
+          - path: "~/"
+          - key: "timestamp.txt"
       - name: Run
         env:
           WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
