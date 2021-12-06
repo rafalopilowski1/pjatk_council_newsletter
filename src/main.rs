@@ -61,16 +61,14 @@ async fn send_webhook(feed: &Feed) -> Result<(), Box<dyn Error>> {
             last_date_time.timestamp()
         );
         let feedEntry: FeedEntry = feed_entry.into();
+        webhook::new(&secret, |webhook| {
+            webhook
+                .username("Listonosz PJATK")
+                .embed(|_| feedEntry.into())
+        })
+        .send()
+        .await?;
         tokio::time::sleep(Duration::new(1, 0)).await;
-        block_on(async {
-            webhook::new(&secret, |webhook| {
-                webhook
-                    .username("Listonosz PJATK")
-                    .embed(|_| feedEntry.into())
-            })
-            .send()
-            .await;
-        });
     }
     let newest_timestamp = feed
         .entries
