@@ -54,7 +54,13 @@ async fn send_webhook(feed: &Feed) -> Result<(), Box<dyn Error>> {
         .rev()
         .filter(|entry| entry.published().unwrap().timestamp() > last_date_time.timestamp())
     {
+        println!(
+            "{0} > {1}",
+            feed_entry.published().unwrap().timestamp(),
+            last_date_time.timestamp()
+        );
         let feedEntry: FeedEntry = feed_entry.into();
+        tokio::time::sleep(Duration::new(1, 0)).await;
         block_on(async {
             webhook::new(&secret, |webhook| {
                 webhook
@@ -64,7 +70,6 @@ async fn send_webhook(feed: &Feed) -> Result<(), Box<dyn Error>> {
             .send()
             .await;
         });
-        tokio::time::sleep(Duration::new(0, 750)).await;
     }
     let newest_timestamp = feed
         .entries
