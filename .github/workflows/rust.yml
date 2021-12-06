@@ -15,16 +15,13 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-
       - name: Cache rust build
       - uses: Swatinem/rust-cache@v1
-
       - name: Cache timestamp
       - uses: actions/cache@v2
         with:
           - key: "timestamp"
           - path: "~/timestamp.txt"
-
       - name: Run
         env:
           WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
