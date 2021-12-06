@@ -16,8 +16,8 @@ jobs:
       - name: Cache timestamp
         uses: actions/cache@v2
         with:
-          - path: "~/"
-          - key: "timestamp.txt"
+          - path: "~/timestamp.txt"
+          - key: "timestamp"
 
       - name: Add Rust toolchain
         uses: actions-rs/toolchain@v1
