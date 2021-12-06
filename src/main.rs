@@ -39,6 +39,7 @@ async fn send_webhook(feed: &Feed) -> Result<(), Box<dyn Error>> {
     let mut buf_read = std::io::BufReader::new(timestamp_file.by_ref());
     let mut timestamp_string = String::new();
     buf_read.read_line(&mut timestamp_string)?;
+    println!("{}", timestamp_string);
     let last_date_time;
     if let Ok(timestamp) = timestamp_string.parse::<i64>() {
         last_date_time =
