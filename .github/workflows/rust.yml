@@ -11,20 +11,24 @@ jobs:
 
     steps:
       - name: Checkout
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
+
       - name: Cache timestamp
-      - uses: actions/cache@v2
+        uses: actions/cache@v2
         with:
           - path: "~/"
           - key: "timestamp.txt"
-      - uses: actions-rs/toolchain@v1
+
+      - name: Add Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
-      - name: Cache rust build
-      - uses: Swatinem/rust-cache@v1
 
-      - name: Run
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v1
+
+      - name: Run the bot
         env:
           WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
         run: cargo run --release
