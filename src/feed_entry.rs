@@ -64,7 +64,7 @@ pub(crate) struct FeedFooter {
 impl From<&Entry> for FeedFooter {
     fn from(atomEntry: &Entry) -> Self {
         FeedFooter {
-            published: atomEntry.published().unwrap().timestamp(),
+            published: atomEntry.published().unwrap().timestamp_nanos(),
             text: "Data publikacji: ".to_owned()
                 + &atomEntry
                     .published()
