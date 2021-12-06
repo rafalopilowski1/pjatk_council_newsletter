@@ -8,6 +8,9 @@
       "type": "lldb",
       "request": "launch",
       "name": "Debug executable 'pjatk_council_newsletter'",
+      "env": {
+        "WEBHOOK_SECRET": "https://discord.com/api/webhooks/917182744835010560/kbjrv6q-5dSAm7bhOwyJR7yGO8eUiAQWJGTdAJzaY5S3K2aj2kUbVzo7sW2sFE32C6h5"
+      },
       "cargo": {
         "args": [
           "build",

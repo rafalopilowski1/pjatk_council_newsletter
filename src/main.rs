@@ -3,10 +3,14 @@ mod feed_entry;
 use atom_syndication::*;
 use chrono::{NaiveDateTime, Utc};
 use feed_entry::FeedEntry;
-use ferrishook::*;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use ferrishook::webhook;
+use futures::executor::block_on;
 
-use std::error::Error;
+use std::{
+    error::Error,
+    io::{BufRead, Write},
+    time::Duration,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -27,39 +31,40 @@ async fn get_data(feed_url: &str) -> Result<Feed, Box<dyn Error>> {
 
 async fn send_webhook(feed: &Feed) -> Result<(), Box<dyn Error>> {
     let secret = std::env::var("WEBHOOK_SECRET")?;
-    let mut timestamp_file = tokio::fs::OpenOptions::new()
-        .create(true)
+    let mut timestamp_file: std::fs::File = std::fs::OpenOptions::new()
         .read(true)
         .write(true)
-        .open("timestamp.txt")
-        .await?;
+        .create(true)
+        .open("timestamp.txt")?;
+    let mut buf_read = std::io::BufReader::new(timestamp_file.by_ref());
     let mut timestamp_string = String::new();
-    timestamp_file.read_to_string(&mut timestamp_string).await?;
+    buf_read.read_line(&mut timestamp_string)?;
     let last_date_time;
-    if let Ok(timestamp) = timestamp_string.parse::<u32>() {
+    if let Ok(timestamp) = timestamp_string.parse::<i64>() {
         last_date_time =
-            chrono::DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, timestamp), Utc);
+            chrono::DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(timestamp, 0), Utc);
     } else {
         last_date_time =
             chrono::DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc);
     };
-    for feed_entry in feed.entries().iter().rev().filter(|entry| {
-        entry
-            .published()
-            .unwrap()
-            .signed_duration_since::<Utc>(last_date_time)
-            .num_nanoseconds()
-            .unwrap()
-            > 0
-    }) {
+
+    for feed_entry in feed
+        .entries()
+        .iter()
+        .rev()
+        .filter(|entry| entry.published().unwrap().timestamp() > last_date_time.timestamp())
+    {
         let feedEntry: FeedEntry = feed_entry.into();
-        webhook::new(&secret, |webhook| {
-            webhook
-                .username("Listonosz PJATK")
-                .embed(|_| feedEntry.into())
-        })
-        .send()
-        .await?;
+        block_on(async {
+            webhook::new(&secret, |webhook| {
+                webhook
+                    .username("Listonosz PJATK")
+                    .embed(|_| feedEntry.into())
+            })
+            .send()
+            .await;
+        });
+        tokio::time::sleep(Duration::new(0, 750)).await;
     }
     let newest_timestamp = feed
         .entries
@@ -67,10 +72,11 @@ async fn send_webhook(feed: &Feed) -> Result<(), Box<dyn Error>> {
         .unwrap()
         .published()
         .unwrap()
-        .timestamp_nanos()
+        .timestamp()
         .to_string();
-    timestamp_file
-        .write_all(newest_timestamp.as_bytes())
-        .await?;
+
+    let mut buf_write = std::io::BufWriter::new(timestamp_file.by_ref());
+    buf_write.write_all(newest_timestamp.as_bytes())?;
+    buf_write.flush()?;
     Ok(())
 }

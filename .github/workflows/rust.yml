@@ -8,15 +8,24 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-    - uses: Swatinem/rust-cache@v1
-    - name: Run
-      env:
-        WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
-      run: cargo run --release
+      - uses: actions/checkout@v2
+
+      - name: Cache rust build
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v1
+
+      - name: Cache timestamp
+      - uses: actions/cache@v2
+        with:
+          - key: "timestamp"
+          - path: "~/timestamp.txt"
+
+      - name: Run
+        env:
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        run: cargo run --release
