@@ -3,6 +3,7 @@ mod feed_entry;
 use atom_syndication::*;
 use chrono::{NaiveDateTime, Utc};
 use feed_entry::FeedEntry;
+use ferrishook::webhook;
 
 use std::{
     error::Error,
