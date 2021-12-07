@@ -18,7 +18,7 @@ jobs:
         with:
           path: "timestamp.txt"
           key: "timestamp-${{ hashFiles('timestamp.txt') }}"
-          restore_keys: |
+          restore-keys: |
             timestamp_
             timestamp
 
