@@ -14,6 +14,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Cache timestamp
+        id: cache-timestamp
         uses: actions/cache@v2
         with:
           path: "timestamp.txt"
@@ -32,6 +33,7 @@ jobs:
         uses: Swatinem/rust-cache@v1
       
       - name: Read the file (before)
+        if: steps.cache-timestamp.cache-hit == true
         run: cat timestamp.txt
       - name: Run the bot
         env:
