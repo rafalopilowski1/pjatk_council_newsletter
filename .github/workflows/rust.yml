@@ -16,7 +16,7 @@ jobs:
       - name: Cache timestamp
         uses: actions/cache@v2
         with:
-          path: "~/timestamp.txt"
+          path: "timestamp.txt"
           key: "timestamp_${{ hashFiles('timestamp.txt') }}"
 
       - name: Add Rust toolchain
@@ -27,10 +27,13 @@ jobs:
 
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v1
-
+      
+      - name: Read the file (before)
+        run: cat timestamp.txt
       - name: Run the bot
         env:
           WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
         run: cargo run --release
-      - name: Read the file
+        
+      - name: Read the file (after)
         run: cat timestamp.txt
