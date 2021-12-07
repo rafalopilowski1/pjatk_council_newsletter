@@ -3,8 +3,6 @@ mod feed_entry;
 use atom_syndication::*;
 use chrono::{NaiveDateTime, Utc};
 use feed_entry::FeedEntry;
-use ferrishook::webhook;
-use futures::executor::block_on;
 
 use std::{
     error::Error,
@@ -78,7 +76,7 @@ async fn send_webhook(feed: &Feed) -> Result<(), Box<dyn Error>> {
         .unwrap()
         .timestamp()
         .to_string();
-
+    timestamp_file = std::fs::File::create("timestamp.txt")?;
     let mut buf_write = std::io::BufWriter::new(timestamp_file.by_ref());
     buf_write.write_all(newest_timestamp.as_bytes())?;
     buf_write.flush()?;
