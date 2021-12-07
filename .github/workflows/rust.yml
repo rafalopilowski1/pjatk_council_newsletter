@@ -16,8 +16,8 @@ jobs:
       - name: Cache timestamp
         uses: actions/cache@v2
         with:
-          path: "~/"
-          key: "timestamp${{ hashFiles('timestamp.txt') }}"
+          path: "~/timestamp.txt"
+          key: "timestamp_${{ hashFiles('timestamp.txt') }}"
 
       - name: Add Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -32,3 +32,5 @@ jobs:
         env:
           WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
         run: cargo run --release
+      - name: Read the file
+        run: cat timestamp.txt
