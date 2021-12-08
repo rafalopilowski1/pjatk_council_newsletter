@@ -1,6 +1,9 @@
-name: Push latest post
+name: Daily posts check
 
-on: workflow_dispatch
+on: 
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
