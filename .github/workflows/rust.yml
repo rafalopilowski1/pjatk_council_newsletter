@@ -34,8 +34,7 @@ jobs:
         run: |
           git config --global user.email "pjatk-council-newsletter@users.noreply.github.com"
           git config --global user.name "PJATK Council Newsletter bot"
-          git add "~/timestamp.txt"
-          git commit "Daily timestamp update"
+          git commit -a "Daily timestamp update"
 
       - name: Push commit
         uses: ad-m/github-push-action@v0.6.0
