@@ -1,14 +1,20 @@
-use atom_syndication::*;
-use ferrishook::*;
-use regex::Regex;
+mod feed_entry;
 
-use std::error::Error;
+use atom_syndication::*;
+use chrono::{NaiveDateTime, Utc};
+use feed_entry::FeedEntry;
+use ferrishook::webhook;
+
+use std::{
+    error::Error,
+    io::{BufRead, Write},
+    time::Duration,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let url = "https://samorzad.pja.edu.pl";
     let feed: Feed = get_data("https://samorzad.pja.edu.pl/feed/atom").await?;
-    send_webhook(&feed, url).await
+    send_webhook(&feed).await
 }
 
 async fn get_data(feed_url: &str) -> Result<Feed, Box<dyn Error>> {
@@ -22,51 +28,58 @@ async fn get_data(feed_url: &str) -> Result<Feed, Box<dyn Error>> {
     Ok(feed)
 }
 
-async fn send_webhook(feed: &Feed, url: &str) -> Result<(), Box<dyn Error>> {
+async fn send_webhook(feed: &Feed) -> Result<(), Box<dyn Error>> {
     let secret = std::env::var("WEBHOOK_SECRET")?;
-    Ok(webhook::new(&secret, |webhook| {
-        let feed_entry = feed.entries().first().unwrap();
-        webhook.username("Listonosz PJATK").embed(|embed| {
-            let mut feed_content_str = feed_entry.content().unwrap().value().unwrap();
-            let feed_content_dom = scraper::html::Html::parse_document(feed_content_str);
-            let mut text = String::new();
-            for textOnce in feed_content_dom.root_element().text().into_iter() {
-                text.push_str(textOnce);
-            }
-            let regex = Regex::new(r"\n+").unwrap();
-            text = regex.replace_all(&mut text, "\n\n").to_string();
-            let mut feed_content_image_url = String::from(url);
-            for image_element in feed_content_dom
-                .select(&scraper::Selector::parse("img").unwrap())
-                .take(1)
-            {
-                feed_content_image_url.push_str(image_element.value().attr("src").unwrap());
-            }
+    let mut timestamp_file: std::fs::File = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open("timestamp.txt")?;
+    let mut buf_read = std::io::BufReader::new(timestamp_file.by_ref());
+    let mut timestamp_string = String::new();
+    buf_read.read_line(&mut timestamp_string)?;
+    println!("{}", timestamp_string);
+    let last_date_time;
+    if let Ok(timestamp) = timestamp_string.parse::<i64>() {
+        last_date_time =
+            chrono::DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(timestamp, 0), Utc);
+    } else {
+        last_date_time =
+            chrono::DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc);
+    };
 
-            embed
-                .author(|author| {
-                    let feed_author = feed_entry.authors().first().unwrap();
-                    author
-                        .name(feed_author.name())
-                        .url(feed_entry.links().first().unwrap().href())
-                })
-                .color(0x8ebda7)
-                .image(feed_content_image_url)
-                .description(text)
-                .footer(|footer| {
-                    footer.text(
-                        "Data publikacji: ".to_owned()
-                            + &feed_entry
-                                .published()
-                                .unwrap()
-                                .naive_local()
-                                .format("%d-%m-%Y %H:%M:%S")
-                                .to_string(),
-                    )
-                })
-                .title(feed_entry.title())
+    for feed_entry in feed
+        .entries()
+        .iter()
+        .rev()
+        .filter(|entry| entry.published().unwrap().timestamp() > last_date_time.timestamp())
+    {
+        println!(
+            "{0} > {1}",
+            feed_entry.published().unwrap().timestamp(),
+            last_date_time.timestamp()
+        );
+        let feedEntry: FeedEntry = feed_entry.into();
+        webhook::new(&secret, |webhook| {
+            webhook
+                .username("Listonosz PJATK")
+                .embed(|_| feedEntry.into())
         })
-    })
-    .send()
-    .await?)
+        .send()
+        .await?;
+        tokio::time::sleep(Duration::new(1, 0)).await;
+    }
+    let newest_timestamp = feed
+        .entries
+        .first()
+        .unwrap()
+        .published()
+        .unwrap()
+        .timestamp()
+        .to_string();
+    timestamp_file = std::fs::File::create("timestamp.txt")?;
+    let mut buf_write = std::io::BufWriter::new(timestamp_file.by_ref());
+    buf_write.write_all(newest_timestamp.as_bytes())?;
+    buf_write.flush()?;
+    Ok(())
 }
