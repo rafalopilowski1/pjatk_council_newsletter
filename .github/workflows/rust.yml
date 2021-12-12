@@ -2,7 +2,7 @@ name: Daily posts check
 
 on: 
   schedule:
-    - cron: '0 5 * * *'
+    - cron: '0 5,13,21 * * *'
   workflow_dispatch:
 
 env:
